@@ -5,11 +5,11 @@ import requests
 
 class WeiChat:
     logging.basicConfig(level=logging.DEBUG)
-    token = ""
+    _token = ""
     @classmethod
     def get_token(cls):
-        print("token"+cls.token)
-        if len(cls.token) == 0:
+        print("token"+cls._token)
+        if len(cls._token) == 0:  # 预先判断token是否为空, 不为空时不再重新获取，减少函数调用次数
             conf = yaml.safe_load(open("WeiChat.yaml"))
             logging.debug(conf["env"])
 
@@ -17,6 +17,6 @@ class WeiChat:
                          params={"corpid": conf["env"]["corpid"],
                                  "corpsecret": conf["env"]["corpsecret"]}
                          ).json()
-            cls.token = r["access_token"]
+            cls._token = r["access_token"]
         else:
-            return cls.token
+            return cls._token
