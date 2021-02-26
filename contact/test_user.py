@@ -4,6 +4,8 @@ import time
 import logging
 import pystache
 
+from contact.user import User
+
 logger = logging.getLogger(__name__)
 logger.setLevel(logging.DEBUG)
 logger.debug("test")
@@ -15,9 +17,9 @@ class TestUser():
     @classmethod
     def setup_class(cls):
         # 创建部门
-        pass
+        cls.user = User()
 
-    def test_creat(self):
+    def test_creat(self):  # 用例只有数据和逻辑调用
         uid = str(time.time())
         data = {
             "userid": uid,
@@ -25,10 +27,7 @@ class TestUser():
             "department": [self.depart_id],
             "email": uid+"@testerhome.com"
         }
-        r = requests.post("https://qyapi.weixin.qq.com/cgi-bin/user/create?access_token=ACCESS_TOKEN",
-                          params=WeiChat.get_token(),
-                          json=data
-                          ).json()
+        r = self.user.creat(data)
         assert r["errcode"] == 0
 
     def test_creat_by_template(self):
