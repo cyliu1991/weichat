@@ -1,14 +1,8 @@
-import requests
-from contact.my_token import WeiChat
+
 import time
 import logging
-import pystache
-
 from contact.user import User
-
-logger = logging.getLogger(__name__)
-logger.setLevel(logging.DEBUG)
-logger.debug("test")
+from contact.utils import Utils
 
 
 class TestUser():
@@ -17,7 +11,7 @@ class TestUser():
     @classmethod
     def setup_class(cls):
         # 创建部门
-        cls.user = User()
+        cls.user = User() # user只需要创建一次，放在setup_class中
 
     def test_creat(self):  # 用例只有数据和逻辑调用
         uid = str(time.time())
@@ -30,34 +24,26 @@ class TestUser():
         r = self.user.creat(data)
         assert r["errcode"] == 0
 
-    def test_creat_by_template(self):
+    def test_creat_by_real(self):
         uid = "test" + str(time.time())
         mobile = str(time.time()).replace(".", "")[0:11]
-        data = self.get_user(self.get_user({
+        data = Utils.parse("user_creat_file.json", {
             "name": uid,
             "title": "tester",
             "mail": "cyliu@163.com",
             "mobile": mobile,
 
-        }))
-        r = requests.post("https://qyapi.weixin.qq.com/cgi-bin/user/create?access_token=ACCESS_TOKEN",
-                          params=WeiChat.get_token(),
-                          data=data,
-                          headers={"content-type": "application/json"}
-                          ).json()
+        })
+        r = self.user.creat(data)
         assert r["errcode"] == 0
 
     def test_list(self):
-        r = requests.get("https://qyapi.weixin.qq.com/cgi-bin/user/simplelist",
-                         params={"access_token": WeiChat.get_token(), "department_id": 1},
-                         ).json()
+        r = self.user.list()
         logging.debug(r)
 
-    def get_user(self, dict):
-        logging.basicConfig(level=logging.DEBUG)
-        template = "".join(open("user_creat_file.json", encoding='utf-8').readlines())
-        logger.debug(template)
-        return pystache.render(template, dict)
-
     def test_get_user(self):
-        logger.debug(self.get_user({"name": "test", "title": "tester", "mail": "cyliu@163.com"}))
+        logging.debug(Utils.parse("user_creat_file.json", {
+            "name": "test",
+            "title": "tester",
+            "mail": "cyliu@163.com"
+        }))
